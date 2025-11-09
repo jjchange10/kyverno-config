@@ -2,8 +2,11 @@ name: kyverno-policy-test
 policies:
   - policies/require-labels.yaml
   - policies/disallow-latest-tag.yaml
+  - policies/require-hpa.yaml
 resources:
   - resources/test-resources/good-pod.yaml
+  - resources/test-resources/good-deployment.yaml
+  - resources/test-resources/good-hpa.yaml
 results:
   - policy: require-labels
     rule: check-for-labels
@@ -19,4 +22,24 @@ results:
     rule: validate-image-tag
     resource: good-pod
     kind: Pod
+    result: pass
+  - policy: require-labels
+    rule: check-for-labels
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-hpa-for-deployments
+    rule: check-hpa-annotation
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: validate-hpa-configuration
+    rule: validate-hpa-has-target
+    resource: myapp-hpa
+    kind: HorizontalPodAutoscaler
+    result: pass
+  - policy: validate-hpa-configuration
+    rule: validate-hpa-replicas
+    resource: myapp-hpa
+    kind: HorizontalPodAutoscaler
     result: pass

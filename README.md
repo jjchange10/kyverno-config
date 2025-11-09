@@ -8,10 +8,13 @@
 .
 ├── policies/                    # Kyvernoポリシーファイル
 │   ├── require-labels.yaml
-│   └── disallow-latest-tag.yaml
+│   ├── disallow-latest-tag.yaml
+│   └── require-hpa.yaml
 ├── resources/
 │   └── test-resources/         # テスト用Kubernetesリソース
-│       └── good-pod.yaml
+│       ├── good-pod.yaml
+│       ├── good-deployment.yaml
+│       └── good-hpa.yaml
 ├── kyverno-test.yaml           # Kyverno testコマンド用テスト定義
 └── .github/
     └── workflows/
@@ -77,6 +80,16 @@ Kubernetes リソースに必須ラベル `app.kubernetes.io/name` が設定さ�
 コンテナイメージに `latest` タグの使用を禁止し、明示的なバージョンタグを要求します。
 
 **対象リソース**: Pod
+
+### 3. require-hpa.yaml
+
+本番環境のDeploymentにHPA（HorizontalPodAutoscaler）が設定されていることを検証します。
+
+**含まれるポリシー**:
+- `require-hpa-for-deployments`: Deploymentに `autoscaling.kubernetes.io/enabled: "true"` アノテーションがあることを確認
+- `validate-hpa-configuration`: HPAリソースが適切に設定されていることを確認（scaleTargetRef、minReplicas、maxReplicasの検証）
+
+**対象リソース**: Deployment, HorizontalPodAutoscaler
 
 ## 🔍 新しいポリシーの追加方法
 

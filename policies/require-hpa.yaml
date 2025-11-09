@@ -1,0 +1,75 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-hpa-for-deployments
+  annotations:
+    policies.kyverno.io/title: Require HPA for Deployments
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Production Deployments should have HorizontalPodAutoscaler (HPA) configured
+      for automatic scaling. This policy validates that Deployments have the
+      autoscaling annotation set, indicating that HPA is configured.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-hpa-annotation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+      validate:
+        message: "Deployment must have autoscaling enabled annotation. Set 'autoscaling.kubernetes.io/enabled: true' annotation."
+        pattern:
+          metadata:
+            annotations:
+              autoscaling.kubernetes.io/enabled: "true"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: validate-hpa-configuration
+  annotations:
+    policies.kyverno.io/title: Validate HPA Configuration
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Validates that HorizontalPodAutoscaler resources are properly configured
+      with scaleTargetRef, minReplicas, and maxReplicas.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: validate-hpa-has-target
+      match:
+        any:
+          - resources:
+              kinds:
+                - HorizontalPodAutoscaler
+      validate:
+        message: "HPA must have a scaleTargetRef defined."
+        pattern:
+          spec:
+            scaleTargetRef:
+              kind: Deployment
+              name: "?*"
+    - name: validate-hpa-replicas
+      match:
+        any:
+          - resources:
+              kinds:
+                - HorizontalPodAutoscaler
+      validate:
+        message: "HPA must have minReplicas and maxReplicas defined, and maxReplicas must be greater than minReplicas."
+        pattern:
+          spec:
+            minReplicas: ">0"
+            maxReplicas: ">1"
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.maxReplicas }}"
+                operator: LessThanOrEquals
+                value: "{{ request.object.spec.minReplicas }}"

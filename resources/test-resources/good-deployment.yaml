@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+  labels:
+    app.kubernetes.io/name: myapp
+  annotations:
+    autoscaling.kubernetes.io/enabled: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+        app.kubernetes.io/name: myapp
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.25.0
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
