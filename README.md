@@ -83,13 +83,17 @@ Kubernetes リソースに必須ラベル `app.kubernetes.io/name` が設定さ�
 
 ### 3. require-hpa.yaml
 
-本番環境のDeploymentにHPA（HorizontalPodAutoscaler）が設定されていることを検証します。
+Deployment/StatefulSetに対応するHPA（HorizontalPodAutoscaler）が実際に存在することを検証します。
 
 **含まれるポリシー**:
-- `require-hpa-for-deployments`: Deploymentに `autoscaling.kubernetes.io/enabled: "true"` アノテーションがあることを確認
+- `check-hpa-exists`: API経由で同じnamespace内のHPAを取得し、Deployment/StatefulSetに対応するHPAが存在するかを確認
+  - contextとapiCallを使用して実際のクラスター状態を参照
+  - HPAのscaleTargetRef.nameにリソース名が含まれているかをチェック
 - `validate-hpa-configuration`: HPAリソースが適切に設定されていることを確認（scaleTargetRef、minReplicas、maxReplicasの検証）
 
-**対象リソース**: Deployment, HorizontalPodAutoscaler
+**対象リソース**: Deployment, StatefulSet, HorizontalPodAutoscaler
+
+**動作モード**: Audit（検知のみ、ブロックしない）
 
 ## 🔍 新しいポリシーの追加方法
 

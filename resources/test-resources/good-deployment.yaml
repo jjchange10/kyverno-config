@@ -4,8 +4,6 @@ metadata:
   name: myapp-deployment
   labels:
     app.kubernetes.io/name: myapp
-  annotations:
-    autoscaling.kubernetes.io/enabled: "true"
 spec:
   replicas: 2
   selector:

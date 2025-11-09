@@ -28,8 +28,8 @@ results:
     resource: myapp-deployment
     kind: Deployment
     result: pass
-  - policy: require-hpa-for-deployments
-    rule: check-hpa-annotation
+  - policy: check-hpa-exists
+    rule: validate-hpa-exists
     resource: myapp-deployment
     kind: Deployment
     result: pass
