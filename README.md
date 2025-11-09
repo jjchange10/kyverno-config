@@ -26,9 +26,8 @@
 
 ### ワークフローの内容
 
-1. **ポリシーバリデーション**: `kyverno validate` コマンドでポリシーファイルの構文チェック
-2. **ポリシーテスト**: `kyverno apply` コマンドでポリシーをテストリソースに適用
-3. **テストケース実行**: `kyverno test` コマンドで定義されたテストケースを実行
+1. **ポリシーテスト**: `kyverno apply` コマンドでポリシーをテストリソースに適用
+2. **テストケース実行**: `kyverno test` コマンドで定義されたテストケースを実行
 
 ### トリガー条件
 
@@ -42,21 +41,11 @@
 
 ```bash
 # Linux
-wget -qO- https://github.com/kyverno/kyverno/releases/download/v1.11.1/kyverno-cli_v1.11.1_linux_x86_64.tar.gz | tar -xz
+wget -qO- https://github.com/kyverno/kyverno/releases/download/v1.12.0/kyverno-cli_v1.12.0_linux_x86_64.tar.gz | tar -xz
 sudo mv kyverno /usr/local/bin/
 
 # macOS (Homebrew)
 brew install kyverno
-```
-
-### ポリシーの検証
-
-```bash
-# 個別のポリシーを検証
-kyverno validate policies/require-labels.yaml
-
-# 全てのポリシーを検証
-kyverno validate policies/
 ```
 
 ### ポリシーのテスト

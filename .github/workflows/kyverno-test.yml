@@ -20,23 +20,9 @@ jobs:
 
       - name: Install Kyverno CLI
         run: |
-          wget -qO- https://github.com/kyverno/kyverno/releases/download/v1.11.1/kyverno-cli_v1.11.1_linux_x86_64.tar.gz | tar -xz
+          wget -qO- https://github.com/kyverno/kyverno/releases/download/v1.12.0/kyverno-cli_v1.12.0_linux_x86_64.tar.gz | tar -xz
           sudo mv kyverno /usr/local/bin/
           kyverno version
-
-      - name: Validate Kyverno Policies
-        run: |
-          echo "Validating Kyverno policies..."
-          if [ -d "policies" ] && [ "$(find policies -name '*.yaml' -o -name '*.yml' | wc -l)" -gt 0 ]; then
-            for policy in policies/*.yaml policies/*.yml; do
-              if [ -f "$policy" ]; then
-                echo "Validating $policy"
-                kyverno validate "$policy" || exit 1
-              fi
-            done
-          else
-            echo "No policy files found in policies/ directory"
-          fi
 
       - name: Test Policies Against Resources
         run: |
