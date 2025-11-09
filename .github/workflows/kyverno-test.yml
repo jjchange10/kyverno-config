@@ -29,15 +29,14 @@ jobs:
 
       - name: Test Policies Against Resources
         run: |
-          echo "Testing policies against resources..."
-          echo "Note: Policies with apiCall (context) are skipped in kyverno apply"
-          echo "Applying basic policies (require-labels, disallow-latest-tag)..."
-          if [ -f "policies/require-labels.yaml" ] && [ -f "resources/test-resources/good-pod.yaml" ]; then
-            kyverno apply policies/require-labels.yaml policies/disallow-latest-tag.yaml \
-              --resource resources/test-resources/good-pod.yaml \
-              --resource resources/test-resources/good-deployment.yaml || exit 1
+          echo "Testing policies against resources with values file..."
+          echo "Using values.yaml to mock apiCall context variables"
+          if [ -f "values.yaml" ] && [ -d "policies" ] && [ -d "resources/test-resources" ]; then
+            kyverno apply policies/ \
+              --resource resources/test-resources/ \
+              --values-file values.yaml || exit 1
           else
-            echo "Skipping: Basic policy files not found"
+            echo "Skipping: Required files not found"
           fi
 
       - name: Run Kyverno Test (if test.yaml exists)
