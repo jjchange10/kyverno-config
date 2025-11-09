@@ -93,11 +93,25 @@ Deployment/StatefulSetに対応するHPA（HorizontalPodAutoscaler）が実際�
 - `check-hpa-exists`: API経由で同じnamespace内のHPAを取得し、Deployment/StatefulSetに対応するHPAが存在するかを確認
   - contextとapiCallを使用して実際のクラスター状態を参照
   - HPAのscaleTargetRef.nameにリソース名が含まれているかをチェック
+  - テスト時は`values`フィールドでapiCallの結果をモック
 - `validate-hpa-configuration`: HPAリソースが適切に設定されていることを確認（scaleTargetRef、minReplicas、maxReplicasの検証）
 
 **対象リソース**: Deployment, StatefulSet, HorizontalPodAutoscaler
 
 **動作モード**: Audit（検知のみ、ブロックしない）
+
+**テスト時のapiCallモック**:
+```yaml
+results:
+  - policy: check-hpa-exists
+    rule: validate-hpa-exists
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+    values:
+      hpas:
+        - myapp-deployment  # apiCallの結果をモック
+```
 
 ## 🔍 新しいポリシーの追加方法
 
