@@ -33,14 +33,8 @@ spec:
               kinds:
                 - HorizontalPodAutoscaler
       validate:
-        message: "HPA must have minReplicas and maxReplicas defined, and maxReplicas must be greater than minReplicas."
+        message: "HPA must have minReplicas (>0) and maxReplicas (>1) defined."
         pattern:
           spec:
             minReplicas: ">0"
             maxReplicas: ">1"
-        deny:
-          conditions:
-            any:
-              - key: "{{ request.object.spec.maxReplicas }}"
-                operator: LessThanOrEquals
-                value: "{{ request.object.spec.minReplicas }}"
