@@ -1,0 +1,39 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: check-hpa-exists
+  annotations:
+    policies.kyverno.io/title: Ensure HPA for Deployments
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: HorizontalPodAutoscaler, Deployment
+    policies.kyverno.io/description: >-
+      This policy ensures that Deployments and StatefulSets have a corresponding
+      Horizontal Pod Autoscaler (HPA) configured in the same namespace.
+      Note: This policy requires Kubernetes API access and will be skipped in CI environments.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: validate-hpa-exists
+      match:
+        any:
+        - resources:
+            kinds:
+              - Deployment
+              - StatefulSet
+      context:
+        - name: hpas
+          apiCall:
+            urlPath: "/apis/autoscaling/v2/namespaces/{{request.namespace}}/horizontalpodautoscalers"
+            jmesPath: "items[?spec.scaleTargetRef.kind=='{{request.kind}}'].spec.scaleTargetRef.name"
+      validate:
+        message: >-
+          リソース ({{request.kind}}/{{request.name}}) に対応するHPAが見つかりません。
+          HPAを作成してください。
+        deny:
+          conditions:
+            all:
+            - key: "{{request.object.metadata.name}}"
+              operator: NotIn
+              value: "{{hpas}}"

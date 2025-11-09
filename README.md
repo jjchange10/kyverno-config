@@ -9,7 +9,8 @@
 ├── policies/                    # Kyvernoポリシーファイル
 │   ├── require-labels.yaml
 │   ├── disallow-latest-tag.yaml
-│   └── require-hpa.yaml
+│   ├── require-hpa.yaml
+│   └── check-hpa-exists.yaml
 ├── resources/
 │   └── test-resources/         # テスト用Kubernetesリソース
 │       ├── good-pod.yaml
@@ -30,6 +31,7 @@
 1. **ポリシーテスト**: `kyverno apply` コマンドで全ポリシーをテストリソースに適用
    - ポリシーをリソースに適用して検証
    - 基本的なバリデーションポリシーをテスト
+   - 注: `check-hpa-exists.yaml`はKubernetes API必要のためスキップされます
 2. **テストケース実行**: `kyverno test` コマンドで定義されたテストケースを実行
    - 構造化されたテストケースで期待結果を検証
    - 全てのポリシーとリソースの組み合わせをテスト
@@ -99,6 +101,21 @@ HPA（HorizontalPodAutoscaler）リソースが適切に設定されているこ
 **対象リソース**: HorizontalPodAutoscaler
 
 **動作モード**: Audit（検知のみ、ブロックしない）
+
+### 4. check-hpa-exists.yaml
+
+Deployment/StatefulSetに対応するHPAが実際に存在するかをKubernetes APIを使って検証します。
+
+**ポリシー内容**:
+- `check-hpa-exists`: API経由で同じnamespace内のHPAを取得し、対応するHPAが存在するか確認
+  - `context.apiCall`を使用して実際のクラスター状態を参照
+  - HPAの`scaleTargetRef.name`にリソース名が含まれているかチェック
+
+**対象リソース**: Deployment, StatefulSet
+
+**動作モード**: Audit（検知のみ、ブロックしない）
+
+**注意**: このポリシーはKubernetes APIへのアクセスが必要なため、CI環境（`kyverno apply`）ではスキップされます。実際のKubernetesクラスターにKyvernoをデプロイした際に機能します。
 
 ## 🔍 新しいポリシーの追加方法
 
