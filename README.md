@@ -11,9 +11,7 @@
 │   └── disallow-latest-tag.yaml
 ├── resources/
 │   └── test-resources/         # テスト用Kubernetesリソース
-│       ├── good-pod.yaml
-│       ├── bad-pod-no-label.yaml
-│       └── bad-pod-latest-tag.yaml
+│       └── good-pod.yaml
 ├── kyverno-test.yaml           # Kyverno testコマンド用テスト定義
 └── .github/
     └── workflows/
