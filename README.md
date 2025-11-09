@@ -16,7 +16,6 @@
 │       ├── good-deployment.yaml
 │       └── good-hpa.yaml
 ├── kyverno-test.yaml           # Kyverno testコマンド用テスト定義
-├── values.yaml                 # apiCallモック用のコンテキスト変数定義
 └── .github/
     └── workflows/
         └── kyverno-test.yml    # GitHub Actions CI/CDワークフロー
@@ -29,12 +28,11 @@
 ### ワークフローの内容
 
 1. **ポリシーテスト**: `kyverno apply` コマンドで全ポリシーをテストリソースに適用
-   - `values.yaml`を使用してapiCallの結果をモック
-   - `--values-file`オプションでコンテキスト変数を提供
-   - 全てのポリシー（HPA検証を含む）をテスト可能
+   - ポリシーをリソースに適用して検証
+   - 基本的なバリデーションポリシーをテスト
 2. **テストケース実行**: `kyverno test` コマンドで定義されたテストケースを実行
    - 構造化されたテストケースで期待結果を検証
-   - `kyverno-test.yaml`内のvaluesフィールドでもapiCallをモック
+   - 全てのポリシーとリソースの組み合わせをテスト
 
 ### トリガー条件
 
@@ -59,11 +57,11 @@ brew install kyverno
 ### ポリシーのテスト
 
 ```bash
-# ポリシーをリソースに適用してテスト（values.yamlでapiCallをモック）
-kyverno apply policies/ --resource resources/test-resources/ --values-file values.yaml
+# 全ポリシーをリソースに適用してテスト
+kyverno apply policies/ --resource resources/test-resources/
 
-# valuesファイルなしで基本ポリシーのみテスト
-kyverno apply policies/require-labels.yaml policies/disallow-latest-tag.yaml \
+# 特定のポリシーとリソースでテスト
+kyverno apply policies/require-labels.yaml \
   --resource resources/test-resources/good-pod.yaml
 ```
 
@@ -90,44 +88,17 @@ Kubernetes リソースに必須ラベル `app.kubernetes.io/name` が設定さ�
 
 ### 3. require-hpa.yaml
 
-Deployment/StatefulSetに対応するHPA（HorizontalPodAutoscaler）が実際に存在することを検証します。
+HPA（HorizontalPodAutoscaler）リソースが適切に設定されていることを検証します。
 
-**含まれるポリシー**:
-- `check-hpa-exists`: API経由で同じnamespace内のHPAを取得し、Deployment/StatefulSetに対応するHPAが存在するかを確認
-  - contextとapiCallを使用して実際のクラスター状態を参照
-  - HPAのscaleTargetRef.nameにリソース名が含まれているかをチェック
-  - テスト時は`values`フィールドでapiCallの結果をモック
-- `validate-hpa-configuration`: HPAリソースが適切に設定されていることを確認（scaleTargetRef、minReplicas、maxReplicasの検証）
+**ポリシー内容**:
+- `validate-hpa-configuration`: HPAリソースが適切に設定されていることを確認
+  - `scaleTargetRef`: Deploymentへの参照が正しく設定されているか
+  - `minReplicas`: 1以上であること
+  - `maxReplicas`: 2以上であり、minReplicasより大きいこと
 
-**対象リソース**: Deployment, StatefulSet, HorizontalPodAutoscaler
+**対象リソース**: HorizontalPodAutoscaler
 
 **動作モード**: Audit（検知のみ、ブロックしない）
-
-**テスト時のapiCallモック**:
-
-`values.yaml`ファイルでapiCallの結果をモック：
-```yaml
-policies:
-  - name: check-hpa-exists
-    rules:
-      - name: validate-hpa-exists
-        values:
-          hpas:
-            - myapp-deployment  # HPAのscaleTargetRef.nameリストをモック
-```
-
-`kyverno-test.yaml`内でもモック可能：
-```yaml
-results:
-  - policy: check-hpa-exists
-    rule: validate-hpa-exists
-    resource: myapp-deployment
-    kind: Deployment
-    result: pass
-    values:
-      hpas:
-        - myapp-deployment
-```
 
 ## 🔍 新しいポリシーの追加方法
 

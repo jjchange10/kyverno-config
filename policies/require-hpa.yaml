@@ -1,62 +1,6 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: check-hpa-exists
-  annotations:
-    policies.kyverno.io/title: Ensure HPA for Deployments
-    policies.kyverno.io/category: Other
-    policies.kyverno.io/severity: medium
-    policies.kyverno.io/subject: HorizontalPodAutoscaler, Deployment
-    policies.kyverno.io/description: >-
-      This policy ensures that Deployments, ReplicaSets, StatefulSets,
-      and DaemonSets are only allowed if they have a corresponding
-      Horizontal Pod Autoscaler (HPA) configured in the same namespace.
-spec:
-  # 'Audit' に設定すると違反をブロックせず、レポートのみを行います。
-  # 「検知」が目的であれば 'Audit' が推奨されます。
-  # 'Enforce' に設定すると、HPAがないリソースの作成・更新がブロックされます。
-  validationFailureAction: Audit
-
-  # 'true' にすると、既存のリソースに対してもスキャンが実行されます。
-  background: true
-
-  rules:
-    - name: validate-hpa-exists
-      # match: どのリソースを対象にチェックするかを指定
-      match:
-        any:
-        - resources:
-            kinds:
-              - Deployment
-              - StatefulSet
-              # 必要に応じて他のリソース（ReplicaSetなど）も追加
-
-      # context: 検証に必要な外部データ（この場合はHPAの情報）をAPI経由で取得
-      context:
-        - name: hpas
-          apiCall:
-            # HPAリソースの一覧を取得するAPIパス
-            # {{ request.namespace }} で、対象リソースと同じNamespaceのHPAを検索
-            urlPath: "/apis/autoscaling/v2/namespaces/{{request.namespace}}/horizontalpodautoscalers"
-            # JMESPathクエリで、HPAのリストから `scaleTargetRef.name` だけを抽出
-            jmesPath: "items[?spec.scaleTargetRef.kind=='{{request.kind}}'].spec.scaleTargetRef.name"
-
-      # validate: 実際に検証するルール
-      validate:
-        message: >-
-          リソース ({{request.kind}}/{{request.name}}) に対応するHPAが見つかりません。
-          HPAを作成してください。
-        # deny: この条件が満たされた場合（trueになった場合）に違反とみなす
-        deny:
-          conditions:
-            all:
-            - key: "{{request.object.metadata.name}}" # 検証対象リソース名
-              operator: NotIn # が、以下のリストに含まれていない
-              value: "{{hpas}}" # (contextで取得したHPAのターゲット名リスト)
----
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
-metadata:
   name: validate-hpa-configuration
   annotations:
     policies.kyverno.io/title: Validate HPA Configuration

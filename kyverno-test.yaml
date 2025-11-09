@@ -28,14 +28,6 @@ results:
     resource: myapp-deployment
     kind: Deployment
     result: pass
-  - policy: check-hpa-exists
-    rule: validate-hpa-exists
-    resource: myapp-deployment
-    kind: Deployment
-    result: pass
-    values:
-      hpas:
-        - myapp-deployment
   - policy: validate-hpa-configuration
     rule: validate-hpa-has-target
     resource: myapp-hpa

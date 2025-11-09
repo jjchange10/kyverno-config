@@ -29,12 +29,10 @@ jobs:
 
       - name: Test Policies Against Resources
         run: |
-          echo "Testing policies against resources with values file..."
-          echo "Using values.yaml to mock apiCall context variables"
-          if [ -f "values.yaml" ] && [ -d "policies" ] && [ -d "resources/test-resources" ]; then
+          echo "Testing policies against resources..."
+          if [ -d "policies" ] && [ -d "resources/test-resources" ]; then
             kyverno apply policies/ \
-              --resource resources/test-resources/ \
-              --values-file values.yaml || exit 1
+              --resource resources/test-resources/ || exit 1
           else
             echo "Skipping: Required files not found"
           fi

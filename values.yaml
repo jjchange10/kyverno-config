@@ -1,7 +1,0 @@
-policies:
-  - name: check-hpa-exists
-    rules:
-      - name: validate-hpa-exists
-        values:
-          hpas:
-            - myapp-deployment
