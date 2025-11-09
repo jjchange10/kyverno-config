@@ -1,0 +1,63 @@
+name: Kyverno Policy Validation
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-policies:
+    runs-on: ubuntu-latest
+    name: Validate Kyverno Policies
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Kyverno CLI
+        run: |
+          wget -qO- https://github.com/kyverno/kyverno/releases/download/v1.11.1/kyverno-cli_v1.11.1_linux_x86_64.tar.gz | tar -xz
+          sudo mv kyverno /usr/local/bin/
+          kyverno version
+
+      - name: Validate Kyverno Policies
+        run: |
+          echo "Validating Kyverno policies..."
+          if [ -d "policies" ] && [ "$(find policies -name '*.yaml' -o -name '*.yml' | wc -l)" -gt 0 ]; then
+            for policy in policies/*.yaml policies/*.yml; do
+              if [ -f "$policy" ]; then
+                echo "Validating $policy"
+                kyverno validate "$policy" || exit 1
+              fi
+            done
+          else
+            echo "No policy files found in policies/ directory"
+          fi
+
+      - name: Test Policies Against Resources
+        run: |
+          echo "Testing policies against resources..."
+          if [ -d "policies" ] && [ -d "resources/test-resources" ]; then
+            if [ "$(find policies -name '*.yaml' -o -name '*.yml' | wc -l)" -gt 0 ] && \
+               [ "$(find resources/test-resources -name '*.yaml' -o -name '*.yml' | wc -l)" -gt 0 ]; then
+              echo "Running kyverno apply..."
+              kyverno apply policies/ --resource resources/test-resources/ || exit 1
+            else
+              echo "Skipping test: No policy or resource files found"
+            fi
+          else
+            echo "Skipping test: policies/ or resources/test-resources/ directory not found"
+          fi
+
+      - name: Run Kyverno Test (if test.yaml exists)
+        run: |
+          if [ -f "kyverno-test.yaml" ]; then
+            echo "Running kyverno test..."
+            kyverno test .
+          else
+            echo "No kyverno-test.yaml found, skipping kyverno test"
+          fi

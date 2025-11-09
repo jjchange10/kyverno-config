@@ -1,0 +1,54 @@
+name: kyverno-policy-test
+policies:
+  - policies/require-labels.yaml
+  - policies/disallow-latest-tag.yaml
+resources:
+  - resources/test-resources/good-pod.yaml
+  - resources/test-resources/bad-pod-no-label.yaml
+  - resources/test-resources/bad-pod-latest-tag.yaml
+results:
+  - policy: require-labels
+    rule: check-for-labels
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-labels
+    rule: check-for-labels
+    resource: bad-pod-no-label
+    kind: Pod
+    result: fail
+  - policy: require-labels
+    rule: check-for-labels
+    resource: bad-pod-latest-tag
+    kind: Pod
+    result: pass
+  - policy: disallow-latest-tag
+    rule: require-image-tag
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: disallow-latest-tag
+    rule: validate-image-tag
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: disallow-latest-tag
+    rule: require-image-tag
+    resource: bad-pod-no-label
+    kind: Pod
+    result: pass
+  - policy: disallow-latest-tag
+    rule: validate-image-tag
+    resource: bad-pod-no-label
+    kind: Pod
+    result: pass
+  - policy: disallow-latest-tag
+    rule: require-image-tag
+    resource: bad-pod-latest-tag
+    kind: Pod
+    result: pass
+  - policy: disallow-latest-tag
+    rule: validate-image-tag
+    resource: bad-pod-latest-tag
+    kind: Pod
+    result: fail
