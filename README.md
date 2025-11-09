@@ -33,7 +33,8 @@
 
 - mainブランチへのpush
 - `claude/**` ブランチへのpush
-- mainブランチへのPull Request
+- mainブランチへのPull Request作成時 (opened)
+- mainブランチへのPull Request更新時 (synchronize)
 
 ## 🔧 ローカルでのテスト
 

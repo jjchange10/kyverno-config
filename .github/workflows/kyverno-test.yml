@@ -6,6 +6,9 @@ on:
       - main
       - 'claude/**'
   pull_request:
+    types:
+      - opened
+      - synchronize
     branches:
       - main
 
