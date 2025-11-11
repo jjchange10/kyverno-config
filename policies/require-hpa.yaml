@@ -1,0 +1,40 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: validate-hpa-configuration
+  annotations:
+    policies.kyverno.io/title: Validate HPA Configuration
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Validates that HorizontalPodAutoscaler resources are properly configured
+      with scaleTargetRef, minReplicas, and maxReplicas.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: validate-hpa-has-target
+      match:
+        any:
+          - resources:
+              kinds:
+                - HorizontalPodAutoscaler
+      validate:
+        message: "HPA must have a scaleTargetRef defined."
+        pattern:
+          spec:
+            scaleTargetRef:
+              kind: Deployment
+              name: "?*"
+    - name: validate-hpa-replicas
+      match:
+        any:
+          - resources:
+              kinds:
+                - HorizontalPodAutoscaler
+      validate:
+        message: "HPA must have minReplicas (>0) and maxReplicas (>1) defined."
+        pattern:
+          spec:
+            minReplicas: ">0"
+            maxReplicas: ">1"

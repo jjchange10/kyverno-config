@@ -1,0 +1,125 @@
+name: kyverno-policy-test
+policies:
+  - policies/require-labels.yaml
+  - policies/disallow-latest-tag.yaml
+  - policies/require-hpa.yaml
+  - policies/require-semver-tag.yaml
+  - policies/require-resource-limits.yaml
+  - policies/require-security-context.yaml
+  - policies/require-probes.yaml
+  - policies/require-image-pull-policy.yaml
+resources:
+  - resources/test-resources/good-pod.yaml
+  - resources/test-resources/good-deployment.yaml
+  - resources/test-resources/good-hpa.yaml
+results:
+  - policy: require-labels
+    rule: check-for-labels
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: disallow-latest-tag
+    rule: require-image-tag
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: disallow-latest-tag
+    rule: validate-image-tag
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-labels
+    rule: check-for-labels
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: validate-hpa-configuration
+    rule: validate-hpa-has-target
+    resource: myapp-hpa
+    kind: HorizontalPodAutoscaler
+    result: pass
+  - policy: validate-hpa-configuration
+    rule: validate-hpa-replicas
+    resource: myapp-hpa
+    kind: HorizontalPodAutoscaler
+    result: pass
+  - policy: require-semver-image-tag
+    rule: validate-image-tag-format
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-semver-image-tag
+    rule: validate-image-tag-format
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-resource-limits
+    rule: validate-resources
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-resource-limits
+    rule: validate-resources
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-security-context
+    rule: check-run-as-non-root
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-security-context
+    rule: check-privilege-escalation
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-security-context
+    rule: drop-all-capabilities
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-security-context
+    rule: check-run-as-non-root
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-security-context
+    rule: check-privilege-escalation
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-security-context
+    rule: drop-all-capabilities
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-probes
+    rule: validate-readiness-probe
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-probes
+    rule: validate-liveness-probe
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-probes
+    rule: validate-readiness-probe
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-probes
+    rule: validate-liveness-probe
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-image-pull-policy
+    rule: validate-image-pull-policy
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-image-pull-policy
+    rule: validate-image-pull-policy
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass

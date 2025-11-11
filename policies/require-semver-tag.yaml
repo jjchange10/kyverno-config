@@ -1,0 +1,55 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-semver-image-tag
+  annotations:
+    policies.kyverno.io/title: Require Semantic Versioning for Image Tags
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Container images must use semantic versioning (e.g., 1.2.3, v1.2.3)
+      or date-based tags (e.g., 20240101). This prevents using ambiguous
+      tags like 'latest', 'dev', 'stable', etc.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: validate-image-tag-format
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+                - Job
+                - CronJob
+      validate:
+        message: >-
+          Image tag must follow semantic versioning (e.g., 1.2.3, v1.2.3)
+          or date format (e.g., 20240101, 2024-01-01).
+          Current image: {{ images.containers.*.name | join(', ') }}
+        foreach:
+          - list: "request.object.spec.containers[]"
+            deny:
+              conditions:
+                any:
+                  # Deny if no tag or using latest
+                  - key: "{{ element.image }}"
+                    operator: AnyNotIn
+                    value:
+                      - "*:*"
+                  - key: "{{ element.image }}"
+                    operator: AnyIn
+                    value:
+                      - "*:latest"
+                      - "*:dev"
+                      - "*:develop"
+                      - "*:master"
+                      - "*:main"
+                      - "*:stable"
+                      - "*:production"
+                      - "*:prod"
+                      - "*:staging"
+                      - "*:test"
