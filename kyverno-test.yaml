@@ -3,6 +3,7 @@ policies:
   - policies/require-labels.yaml
   - policies/disallow-latest-tag.yaml
   - policies/require-hpa.yaml
+  - policies/require-semver-tag.yaml
 resources:
   - resources/test-resources/good-pod.yaml
   - resources/test-resources/good-deployment.yaml
@@ -37,4 +38,14 @@ results:
     rule: validate-hpa-replicas
     resource: myapp-hpa
     kind: HorizontalPodAutoscaler
+    result: pass
+  - policy: require-semver-image-tag
+    rule: validate-image-tag-format
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-semver-image-tag
+    rule: validate-image-tag-format
+    resource: myapp-deployment
+    kind: Deployment
     result: pass

@@ -10,6 +10,7 @@
 │   ├── require-labels.yaml
 │   ├── disallow-latest-tag.yaml
 │   ├── require-hpa.yaml
+│   ├── require-semver-tag.yaml
 │   └── check-hpa-exists.yaml
 ├── resources/
 │   └── test-resources/         # テスト用Kubernetesリソース
@@ -88,7 +89,23 @@ Kubernetes リソースに必須ラベル `app.kubernetes.io/name` が設定さ�
 
 **対象リソース**: Pod
 
-### 3. require-hpa.yaml
+### 3. require-semver-tag.yaml
+
+コンテナイメージのタグがセマンティックバージョニングまたは日付形式に準拠していることを検証します。
+
+**ポリシー内容**:
+- `validate-image-tag-format`: イメージタグのフォーマットを検証
+  - セマンティックバージョニング（例：1.2.3, v1.2.3）の使用を推奨
+  - 日付ベースのタグ（例：20240101, 2024-01-01）も許可
+  - 曖昧なタグ（latest, dev, stable, production, staging等）を禁止
+
+**対象リソース**: Pod, Deployment, StatefulSet, DaemonSet, Job, CronJob
+
+**動作モード**: Audit（検知のみ、ブロックしない）
+
+**禁止されるタグ例**: `latest`, `dev`, `develop`, `master`, `main`, `stable`, `production`, `prod`, `staging`, `test`
+
+### 4. require-hpa.yaml
 
 HPA（HorizontalPodAutoscaler）リソースが適切に設定されていることを検証します。
 
@@ -102,7 +119,7 @@ HPA（HorizontalPodAutoscaler）リソースが適切に設定されているこ
 
 **動作モード**: Audit（検知のみ、ブロックしない）
 
-### 4. check-hpa-exists.yaml
+### 5. check-hpa-exists.yaml
 
 Deployment/StatefulSetに対応するHPAが実際に存在するかをKubernetes APIを使って検証します。
 
