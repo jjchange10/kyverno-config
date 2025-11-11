@@ -4,6 +4,10 @@ policies:
   - policies/disallow-latest-tag.yaml
   - policies/require-hpa.yaml
   - policies/require-semver-tag.yaml
+  - policies/require-resource-limits.yaml
+  - policies/require-security-context.yaml
+  - policies/require-probes.yaml
+  - policies/require-image-pull-policy.yaml
 resources:
   - resources/test-resources/good-pod.yaml
   - resources/test-resources/good-deployment.yaml
@@ -46,6 +50,76 @@ results:
     result: pass
   - policy: require-semver-image-tag
     rule: validate-image-tag-format
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-resource-limits
+    rule: validate-resources
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-resource-limits
+    rule: validate-resources
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-security-context
+    rule: check-run-as-non-root
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-security-context
+    rule: check-privilege-escalation
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-security-context
+    rule: drop-all-capabilities
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-security-context
+    rule: check-run-as-non-root
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-security-context
+    rule: check-privilege-escalation
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-security-context
+    rule: drop-all-capabilities
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-probes
+    rule: validate-readiness-probe
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-probes
+    rule: validate-liveness-probe
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-probes
+    rule: validate-readiness-probe
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-probes
+    rule: validate-liveness-probe
+    resource: myapp-deployment
+    kind: Deployment
+    result: pass
+  - policy: require-image-pull-policy
+    rule: validate-image-pull-policy
+    resource: good-pod
+    kind: Pod
+    result: pass
+  - policy: require-image-pull-policy
+    rule: validate-image-pull-policy
     resource: myapp-deployment
     kind: Deployment
     result: pass

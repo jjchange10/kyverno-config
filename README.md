@@ -9,8 +9,12 @@
 ├── policies/                    # Kyvernoポリシーファイル
 │   ├── require-labels.yaml
 │   ├── disallow-latest-tag.yaml
-│   ├── require-hpa.yaml
 │   ├── require-semver-tag.yaml
+│   ├── require-resource-limits.yaml
+│   ├── require-security-context.yaml
+│   ├── require-probes.yaml
+│   ├── require-image-pull-policy.yaml
+│   ├── require-hpa.yaml
 │   └── check-hpa-exists.yaml
 ├── resources/
 │   └── test-resources/         # テスト用Kubernetesリソース
@@ -105,7 +109,59 @@ Kubernetes リソースに必須ラベル `app.kubernetes.io/name` が設定さ�
 
 **禁止されるタグ例**: `latest`, `dev`, `develop`, `master`, `main`, `stable`, `production`, `prod`, `staging`, `test`
 
-### 4. require-hpa.yaml
+### 4. require-resource-limits.yaml
+
+コンテナにCPUとメモリのrequestsとlimitsが設定されていることを検証します。
+
+**ポリシー内容**:
+- `validate-resources`: 全てのコンテナにリソース制限が定義されているか確認
+  - CPU requests/limits
+  - Memory requests/limits
+
+**対象リソース**: Pod, Deployment, StatefulSet, DaemonSet
+
+**動作モード**: Audit（検知のみ、ブロックしない）
+
+### 5. require-security-context.yaml
+
+コンテナが適切なセキュリティコンテキストで実行されることを検証します。
+
+**ポリシー内容**:
+- `check-run-as-non-root`: コンテナがroot以外のユーザーで実行されることを確認
+- `check-privilege-escalation`: 権限昇格が無効化されていることを確認
+- `drop-all-capabilities`: 全てのLinux capabilitiesがドロップされていることを確認
+
+**対象リソース**: Pod, Deployment, StatefulSet, DaemonSet
+
+**動作モード**: Audit（検知のみ、ブロックしない）
+
+**セキュリティ**: High - セキュリティベストプラクティスの遵守
+
+### 6. require-probes.yaml
+
+コンテナにliveness probeとreadiness probeが設定されていることを検証します。
+
+**ポリシー内容**:
+- `validate-readiness-probe`: readiness probeが定義されているか確認
+- `validate-liveness-probe`: liveness probeが定義されているか確認
+
+**対象リソース**: Pod, Deployment, StatefulSet, DaemonSet
+
+**動作モード**: Audit（検知のみ、ブロックしない）
+
+### 7. require-image-pull-policy.yaml
+
+コンテナイメージのpullポリシーが適切に設定されていることを検証します。
+
+**ポリシー内容**:
+- `validate-image-pull-policy`: imagePullPolicyが`Always`または`IfNotPresent`であることを確認
+  - `Never`の使用を禁止
+
+**対象リソース**: Pod, Deployment, StatefulSet, DaemonSet
+
+**動作モード**: Audit（検知のみ、ブロックしない）
+
+### 8. require-hpa.yaml
 
 HPA（HorizontalPodAutoscaler）リソースが適切に設定されていることを検証します。
 
@@ -119,7 +175,7 @@ HPA（HorizontalPodAutoscaler）リソースが適切に設定されているこ
 
 **動作モード**: Audit（検知のみ、ブロックしない）
 
-### 5. check-hpa-exists.yaml
+### 9. check-hpa-exists.yaml
 
 Deployment/StatefulSetに対応するHPAが実際に存在するかをKubernetes APIを使って検証します。
 
